@@ -1,22 +1,52 @@
-🔒 **point-c**: Seamless Integration of [Caddy](https://caddyserver.com/) with [WireGuard](https://www.wireguard.com/) in pure Go
+# 🔒 **point-c**: 
 
-Welcome to `point-c`! This project is designed to provide a robust and fully integrated solution for running Caddy web server over the secure WireGuard VPN, all powered by the efficiency and flexibility of the Go programming language.
-The goal of this project is to provide flexible and secure web traffic management.
+Seamless Integration of [Caddy](https://caddyserver.com/) with [WireGuard](https://www.wireguard.com/) in pure Go
 
-🧩 **Modular Design**: We've taken care to break down functionality into reusable packages. This modular approach enables other applications to leverage individual components of `point-c`, making it versatile and adaptable to various use cases.
+`point-c` is designed to provide a robust and fully integrated solution for running the Caddy web server over the secure WireGuard VPN. The original motivation for starting this project was to combine the `wireguard-go` library directly with Caddy, instead of using a separate Docker container for WireGuard. The aim is to offer flexible and secure web traffic management.
 
-🚀 **Easy Feature Extension**: We're committed to making it easier for you to extend and enhance the functionality of `point-c`.
+🧩 **Modular Design**: The project emphasizes a modular approach, breaking down functionality into reusable packages. This modular approach enables other applications to leverage individual components of `point-c`, making it versatile and adaptable to various use cases.
 
-🌐 Explore our documentation and get started today to experience the synergy of Caddy and WireGuard with `point-c`. Secure, efficient, and ready to power your web projects!
+🚀 **Easy Feature Extension**: The project is committed to facilitating the extension and enhancement of its functionality.
+
+🌐 Explore the documentation and get started today to experience the synergy of Caddy and WireGuard with point-c. Secure, efficient, and ready to power web projects!
 
 ### Suggested Use Case
 
-The primary use case of `point-c` is to set up Caddy in a WireGuard server configuration on a VPS in the cloud, forwarding traffic to a Caddy setup in a client configuration located anywhere capable of connecting to the server. This flexible setup allows you to change the location or IP of the remote Caddy server at any time.
+The primary use case for `point-c` involves setting up Caddy in a WireGuard server configuration on a VPS in the cloud, forwarding traffic to a Caddy setup in a client configuration located anywhere capable of connecting to the server. This setup allows for flexibility in changing the location or IP of the remote Caddy server at any time. This approach was necessary because my apartment's network setup prevented port forwarding.
 
 ### Why Forward Traffic Through the Tunnel?
 
-Forwarding traffic through the tunnel ensures that it is TLS encrypted before getting wrapped by WireGuard, and completely decrypted on the client side, which then re-encrypts it entirely. This approach ensures that if the WireGuard server is ever compromised, your traffic remains secure due to TLS encryption, with keys securely stored on the local client side.
+Forwarding traffic through the tunnel ensures it is TLS encrypted before it gets wrapped by WireGuard, with complete decryption on the client side, which then re-encrypts the traffic entirely. This process guarantees that the traffic remains secure and is not exposed until it reaches the end user, whose traffic is then secured by their browser before being encrypted by the WireGuard server. This also ensures that users are unable to see the server's real IP address, while the client's real IP is forwarded to the Caddy server, which can then set the proper forwarding headers. Such an approach maintains the security of the traffic through TLS encryption, even if the WireGuard server is compromised, with TLS keys securely stored on the client side.
+
+Here's a diagram showing the basic architecture of this approach:
+
+```mermaid
+sequenceDiagram
+        participant User
+    box Publicly Accessable VPS
+        participant WG as WireGuard Server (Public IP)
+    end
+    box Private Network
+        participant Caddy as Caddy (VPN IP)
+        participant App as Application (LAN IP)
+    end
+
+    par Background WireGuard Connection
+        Caddy->>WG: WireGuard Handshake
+        loop Keepalive
+            WG-)Caddy: Keepalive Packets
+        end
+    and Web Traffic
+        User->>+WG: TLS Connection
+        WG->>+Caddy: WireGuard Wrapped TLS
+        Caddy->>+App: Reverse Proxied Traffic 
+        User-->App: Secure Traffic
+        App->>-Caddy: Reverse Proxied Traffic 
+        Caddy->>-WG: WireGuard Wrapped TLS
+        WG->>-User: TLS Connection
+    end
+```
 
 ### Compatibility and Security
 
-Since this project utilizes official WireGuard libraries, the WireGuard traffic is compatible with any client or server. This interoperability, combined with robust TLS encryption and the efficiency of Caddy and WireGuard, makes `point-c` a powerful tool for secure and versatile web traffic management.
+Utilizing official WireGuard libraries ensures compatibility with any WireGuard client or server. This interoperability, combined with robust TLS encryption and the efficiency of Caddy and WireGuard, makes point-c as a powerful tool for secure and versatile web traffic management.
