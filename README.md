@@ -50,3 +50,9 @@ sequenceDiagram
 ### Compatibility and Security
 
 Utilizing official WireGuard libraries ensures compatibility with any WireGuard client or server. This interoperability, combined with robust TLS encryption and the efficiency of Caddy and WireGuard, makes point-c as a powerful tool for secure and versatile web traffic management.
+
+### Testing and Quality Assurance
+
+Despite the project's 100% test coverage, it's important to note that `point-c` is in its early stages. Users are encouraged to use it with caution. Feedback and bug reports are highly appreciated to help improve and refine the project.
+
+An integration test featuring [librespeed](https://librespeed.org/) benchmarks the system's performance, complementing the unit tests. This approach to testing confirms the integration of Caddy with WireGuard and helps uphold the project's goal towards speed, security, and reliability.
